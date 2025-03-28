@@ -283,7 +283,7 @@ function reloadOptions() {
 }
 
 function executeCommand() {
-  const userInput = replaceAliasInString(commandInput.value.trim());
+  const userInput = commandInput.value.trim();
   if (userInput.startsWith('+ ')) {
     const option = userInput.substring(1).trim();
     if (option) {
@@ -330,11 +330,14 @@ function executeCommand() {
   }
   else if (userInput.startsWith('cls')) {
     clearOptions(); 
-  } else if (userInput.includes('.') && !userInput.includes(' ')) {
-    openLink(userInput); 
   } else {
-    googleSearch(userInput);
+    userInput = replaceAliasInString(userInput);
+    if (userInput.includes('.') && !userInput.includes(' ')) {
+    openLink(userInput); 
+    } else {
+      googleSearch(userInput);
   }
+         }
 
   commandInput.value = '';
 }
