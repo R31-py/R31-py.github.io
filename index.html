@@ -245,8 +245,8 @@ function loadAliases() {
 
 function replaceAliasInString(inputString) {
     for (let alias in aliases) {
-        if (inputString.includes(alias)) {
-            return inputString.replace(alias, aliases[alias]);
+        if (inputString.startsWith("." + alias)) {
+            return inputString.replace("." + alias, aliases[alias]);
         }
     }
     return inputString;
