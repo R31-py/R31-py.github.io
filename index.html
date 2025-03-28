@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Tab </title>
+  
+  <style>
+    /* General Styles */
+    body {
+      background-image: url("Goku.png");
+        background-size: cover;
+        background-position: center;
+      color: #abb2bf;
+      font-family: 'Roboto Mono', monospace;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 800px;
+    }
+
+    /* Time Widget Styles */
+    .time-widget {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #242424;
+      font-size: 24px;
+      text-shadow: #ffffff 0px 0px 10px;
+    }
+
+    /* Terminal Styles */
+    .terminal {
+      background-color: #1e1e1e73;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .terminal-header {
+      background-color: #2d313965;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .terminal-header .close-btn,
+    .terminal-header .minimize-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .terminal-header .close-btn {
+      background-color: #ff5f56;
+    }
+
+    .terminal-header .minimize-btn {
+      background-color: #ffbd2e;
+    }
+
+    .terminal-body {
+      padding: 20px;
+      background-color: #282c3471;
+      height: calc(100% - 80px); /* Adjust based on header and padding */
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .terminal-text {
+      white-space: pre-line;
+      color: #abb2bf;
+      margin-bottom: 10px;
+    }
+
+    .input-line {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .input-line input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #00b00f;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 16px;
+      flex: 1;
+    }
+    #animator{
+        height: 10px;
+        width: 100%;
+        display: block;
+    }
+
+    /* Custom Link Styling */
+    .link-text {
+      color: #61dafb; /* Blue color for links */
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+  /* Updated FAQ Styles */
+  .faq-container {
+    margin-top: 20px;
+  }
+
+  .faq-box {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 20px;
+  }
+
+  .faq-item {
+    margin-bottom: 10px;
+    font-size: 12px;
+  }
+
+  .faq-item .command-text {
+    color: #007bff;
+    cursor: pointer;
+  }
+
+  .faq-item .command-text:hover {
+    text-decoration: underline;
+  }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Time Widget -->
+    <div class="time-widget" id="timeWidget"></div>
+
+    <!-- Terminal -->
+    <div class="terminal">
+      <div class="terminal-header">
+      </div>
+      <div class="terminal-body">
+        <span id="animator">GOOGLE</span>
+        <div id="optionsContainer"></div>
+        <div class="faq-container">
+        </div>
+      </div>
+      <div class="input-line">
+        <input id="commandInput" type="text" placeholder="$renx >" onkeydown="handleEnter(event)">
+      </div>
+    </div>
+  </div>
+
+  <script>
+// Terminal Commands
+const optionsContainer = document.getElementById('optionsContainer'); // Container for options
+const commandInput = document.getElementById('commandInput'); // Input field for commands
+const timeWidget = document.getElementById('timeWidget'); // Time widget
+let aliases = {}; // Object to store aliases
+
+window.onload = function() {
+  loadOptions();
+  updateTime();
+  loadAliases();
+};
+
+function loadOptions() {
+  const storedOptions = localStorage.getItem('options');
+  if (storedOptions) {
+    const options = JSON.parse(storedOptions);
+    options.forEach(option => addOption(option));
+  }
+}
+
+function animateHeader(){
+  const header = document.getElementById('animator');
+  const texts = ['GOOGLE', 'Made By Rei', 'Search on the Go', '<TOP> Rei Kanani </TOP>', 'Hello there'];
+  let i = 0;
+  let text = texts[i];
+  let index = 0;
+
+  function animate() {
+    header.innerText = text.slice(0, index);
+    index++;
+    if (index > text.length) {
+      index = 0;
+      i++;
+      text = texts[i % texts.length];
+    }
+    setTimeout(animate, 200);
+  }
+
+  animate();
+}
+
+animateHeader();
+
+function saveOption(option) {
+  let options = localStorage.getItem('options');
+  options = options ? JSON.parse(options) : [];
+  options.push(option);
+  localStorage.setItem('options', JSON.stringify(options));
+}
+
+function saveAlias(alias, url) {
+    let aliases = localStorage.getItem('aliases');
+    aliases = aliases ? JSON.parse(aliases) : {};
+
+    if (!aliases[alias]) {
+        aliases[alias] = url;
+        localStorage.setItem('aliases', JSON.stringify(aliases));
+    } else {
+        console.warn(`Alias "${alias}" already exists.`);
+    }
+}
+
+function removeAlias(alias) {
+    let aliases = localStorage.getItem('aliases');
+    aliases = aliases ? JSON.parse(aliases) : {};
+
+    if (aliases[alias]) {
+        delete aliases[alias];
+        localStorage.setItem('aliases', JSON.stringify(aliases));
+        console.log(`Alias "${alias}" removed successfully.`);
+    } else {
+        console.warn(`Alias "${alias}" not found.`);
+    }
+}
+
+
+function loadAliases() {
+    aliases = localStorage.getItem('aliases');
+    aliases = aliases ? JSON.parse(aliases) : {};
+}
+
+function replaceAliasInString(inputString) {
+    for (let alias in aliases) {
+        if (inputString.includes(alias)) {
+            return inputString.replace(alias, aliases[alias]);
+        }
+    }
+    return inputString;
+}
+
+
+
+function addOption(option) {
+  const optionElement = document.createElement('pre');
+  optionElement.className = 'terminal-text';
+  optionElement.innerHTML = `~$ <span style="color: #4cd964;">${option}</span>`;
+  if (option.includes('.') && !option.includes(' ')) {
+    optionElement.innerHTML = `~$ <span style="color: #4cd964; cursor: pointer;" onclick="openLink('${option}')">${option}</span>`;
+  }
+  optionsContainer.appendChild(optionElement);
+}
+
+function clearOptions() {
+  localStorage.removeItem('options');
+  reloadOptions();
+}
+
+function removeOption(optionToRemove) {
+  let options = localStorage.getItem('options');
+  options = options ? JSON.parse(options) : [];
+  const filteredOptions = options.filter(option => option !== optionToRemove);
+  localStorage.setItem('options', JSON.stringify(filteredOptions));
+  reloadOptions();
+}
+
+function reloadOptions() {
+  optionsContainer.innerHTML = '';
+  loadOptions();
+}
+
+function executeCommand() {
+  const userInput = replaceAliasInString(commandInput.value.trim());
+  if (userInput.startsWith('+ ')) {
+    const option = userInput.substring(1).trim();
+    if (option) {
+      addOption(option);
+      saveOption(option);
+    }
+  } else if (userInput.startsWith('- ')) {
+    const optionToRemove = userInput.substring(1).trim();
+    if (optionToRemove) {
+      removeOption(optionToRemove);
+    }
+  }else if(userInput.startsWith('+a ')){
+    const aliasInput = userInput.substring(3).trim();
+    const [alias, url] = aliasInput.split(' ');
+    if (alias && url) {
+        saveAlias(alias, url);
+        addOption(`Alias "${alias}" added for URL "${url}"`);
+        loadAliases();
+    }
+  } else if(userInput.startsWith('-a ')){
+    const aliasToRemove = userInput.substring(3).trim();
+    if (aliasToRemove) {
+        removeAlias(aliasToRemove);
+        addOption(`Alias "${aliasToRemove}" removed`);
+        loadAliases();
+    }
+  }else if(userInput.startsWith('help')) {
+    const helpText = `Available commands:
+    + <option_name> - Add an option
+    - <option_name> - Remove an option
+    +a <alias> <url> - Add an alias for a URL
+    -a <alias> - Remove an alias
+    cls - Clear options
+    <url> - Open a link
+    <search_term> - Google search`;
+    addOption(helpText);
+  }else if(userInput.startsWith('/a')){
+    for (const alias in aliases) {
+        const aliasElement = document.createElement('pre');
+        aliasElement.className = 'terminal-text';
+        aliasElement.innerHTML = `~$/aliases/ <span style="color: #4cd964;">${alias} -> ${aliases[alias]}</span>`;
+        optionsContainer.appendChild(aliasElement);
+    }
+  }
+  else if (userInput.startsWith('cls')) {
+    clearOptions(); 
+  } else if (userInput.includes('.') && !userInput.includes(' ')) {
+    openLink(userInput); 
+  } else {
+    googleSearch(userInput);
+  }
+
+  commandInput.value = '';
+}
+
+
+function handleEnter(event) {
+  if (event.key === 'Enter') {
+    executeCommand();
+  }
+}
+
+function showCommand(command) {
+  const exampleCommands = {
+    'add': 'add option_name',
+    'remove': 'remove option_name',
+  };
+
+  commandInput.value = exampleCommands[command];
+}
+
+function googleSearch(query) {
+  const searchQuery = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+  window.open(searchQuery, '_self'); 
+}
+
+function openLink(url) {
+  let fullUrl = url;
+  if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
+    fullUrl = 'http://' + fullUrl; 
+  }
+  window.open(fullUrl, '_self');
+}
+
+function updateTime() {
+  const currentTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  timeWidget.textContent = currentTime; 
+  setTimeout(updateTime, 1000);
+}
+  </script>
+</body>
+</html>
