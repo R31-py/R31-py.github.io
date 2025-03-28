@@ -283,7 +283,7 @@ function reloadOptions() {
 }
 
 function executeCommand() {
-  const userInput = commandInput.value.trim();
+  let userInput = commandInput.value.trim();
   if (userInput.startsWith('+ ')) {
     const option = userInput.substring(1).trim();
     if (option) {
@@ -321,6 +321,7 @@ function executeCommand() {
     <search_term> - Google search`;
     addOption(helpText);
   }else if(userInput.startsWith('/a')){
+    loadAliases();
     for (const alias in aliases) {
         const aliasElement = document.createElement('pre');
         aliasElement.className = 'terminal-text';
